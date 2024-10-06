@@ -34,4 +34,4 @@ Follow these steps to set up and run the project locally:
 - Open a terminal and run the following command to clone the repository:
 
   ```bash
-  git clone https://github.com/yourusername/your-repo-name.git
+  git clone git@gitlab.com:year-2-module-projects/dsa/inventory-management-for-4sale-backend.git
