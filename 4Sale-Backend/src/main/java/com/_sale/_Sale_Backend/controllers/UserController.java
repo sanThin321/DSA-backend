@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin()
+@CrossOrigin("http://localhost:5173")
 public class UserController {
 
     @Autowired
