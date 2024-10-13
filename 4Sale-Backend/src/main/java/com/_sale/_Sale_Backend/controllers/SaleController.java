@@ -22,7 +22,7 @@ public class SaleController {
         return ResponseEntity.ok(savedSale);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping("/all")
     public ResponseEntity<List<Sale>> getAllSales() {
         List<Sale> sales = saleService.getAllSales();
         return ResponseEntity.ok(sales);

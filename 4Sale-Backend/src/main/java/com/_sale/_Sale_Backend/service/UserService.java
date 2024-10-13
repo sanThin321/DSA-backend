@@ -19,5 +19,9 @@ public class UserService {
         System.out.println("New pass: " + user.getPassword());
         return userRepo.save(user);
     }
+
+    public User findUserByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
 }
 
