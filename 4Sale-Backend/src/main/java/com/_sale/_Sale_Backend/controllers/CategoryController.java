@@ -15,9 +15,9 @@ import java.util.List;
 public class CategoryController {
 
     @Autowired
-    CategoryService categoryService;
+    private CategoryService categoryService;
 
-    // Add a category
+    // Add a new category
     @PostMapping("/addCategory")
     public ResponseEntity<?> addCategory(@RequestBody Category category) {
         Category savedCategory = categoryService.addCategory(category);
@@ -29,6 +29,17 @@ public class CategoryController {
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
+    }
+
+    // Get a category by ID
+    @GetMapping("/category/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable int id) {
+        Category category = categoryService.getCategoryById(id);
+        if (category != null) {
+            return new ResponseEntity<>(category, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     // Delete a category by ID
