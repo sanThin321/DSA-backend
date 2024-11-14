@@ -16,4 +16,7 @@ public interface ProductRepo extends JpaRepository<Product, Integer> {
             "LOWER(p.category) LIKE LOWER(CONCAT('%', :keyword, '%'))"
     )
     List<Product> searchProducts(String keyword);
+
+    @Query("SELECT p FROM Product p WHERE p.quantity < p.thresholdValue")
+    List<Product> findByQuantityLessThanThreshold();
 }

@@ -15,12 +15,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false, unique = true)  // Enforce email uniqueness
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)  // Enforce username uniqueness
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false, unique = true)
+    private String phoneNumber;
 }
+
+

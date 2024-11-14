@@ -22,9 +22,15 @@ public class CategoryService {
         return categoryRepo.save(category);  // Persist to DB
     }
 
+    // get category by name
+    public Category getCategoryByName(String name) {
+        return categoryRepo.findByName(name);
+    }
+
     // Get a category by ID from cache or DB
     public Category getCategoryById(int id) {
         Category cachedCategory = categoryCache.get(id);
+
         if (cachedCategory != null) {
             return cachedCategory;
         }

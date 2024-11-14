@@ -3,9 +3,11 @@ package com._sale._Sale_Backend.controllers;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,9 +19,10 @@ public class SaleController {
     private SaleService saleService;
 
     @PostMapping("/add")
-    public ResponseEntity<Sale> createSale(@RequestBody Sale sale) {
+    public ResponseEntity<Sale> createSale(@RequestBody Sale sale) throws IOException {
         Sale savedSale = saleService.saveSale(sale);
-        return ResponseEntity.ok(savedSale);
+//        return ResponseEntity.ok(savedSale);
+        return new ResponseEntity<>(savedSale, HttpStatus.CREATED);
     }
 
     @GetMapping("/all")

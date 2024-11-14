@@ -29,19 +29,3 @@ public class Sale {
     private List<SaleItem> sales;
 }
 
-@Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class SaleItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long saleItemId;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    private int quantity;
-    private BigDecimal totalPrice;
-}

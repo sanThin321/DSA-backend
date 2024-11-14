@@ -33,7 +33,7 @@ public class CustomLinkedList<T> implements Iterable<T> {
     }
 
     // Method to remove elements based on a condition
-    public void removeIf(Predicate<T> condition) {
+    public boolean removeIf(Predicate<T> condition) {
         while (head != null && condition.test(head.data)) {
             head = head.next;
             size--;
@@ -41,7 +41,7 @@ public class CustomLinkedList<T> implements Iterable<T> {
 
         if (head == null) {  // If list is empty after removals
             tail = null;
-            return;
+            return false;
         }
 
         Node<T> current = head;
@@ -56,6 +56,7 @@ public class CustomLinkedList<T> implements Iterable<T> {
                 current = current.next;
             }
         }
+        return false;
     }
 
     // Method to get the size of the list

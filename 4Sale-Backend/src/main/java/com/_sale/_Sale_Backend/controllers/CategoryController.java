@@ -17,12 +17,18 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    // Add a new category
     @PostMapping("/addCategory")
     public ResponseEntity<?> addCategory(@RequestBody Category category) {
+        Category hasCategory = categoryService.getCategoryByName(category.getName());
+
+        if (hasCategory != null) {
+            return new ResponseEntity<>("Category already exists", HttpStatus.CONFLICT);
+        }
+
         Category savedCategory = categoryService.addCategory(category);
         return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
     }
+
 
     // Get all categories
     @GetMapping("/categories")
