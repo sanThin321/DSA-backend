@@ -2,6 +2,7 @@ package com._sale._Sale_Backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -24,8 +25,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
-    private String phoneNumber;
+    @Column
+    private String verificationCode;
+
+    @Column
+    private LocalDateTime verificationExpiry;
 }
-
-

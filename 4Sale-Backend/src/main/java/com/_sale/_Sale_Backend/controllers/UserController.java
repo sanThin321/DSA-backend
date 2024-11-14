@@ -4,6 +4,8 @@ import com._sale._Sale_Backend.model.User;
 import com._sale._Sale_Backend.service.JwtService;
 import com._sale._Sale_Backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,14 +24,13 @@ public class UserController {
     @Autowired
     JwtService jwt;
 
-    @PostMapping("register")
-    public User register(@RequestBody User user) {
-        return userService.saveUser(user);
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String email) {
+        return userService.sendForgotPasswordCode(email);
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public String login(@RequestBody User user) {
-
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
@@ -40,15 +41,34 @@ public class UserController {
         }
     }
 
-    @GetMapping("/auth/user")
-    public User getUser(@RequestHeader("Authorization") String token) {
-        // Remove the "Bearer " prefix from the token
-        token = token.substring(7);
-
-        // Extract the username from the token
-        String username = jwt.extractUserName(token);
-
-        // Retrieve and return user details based on the username
-        return userService.findUserByUsername(username);
+    @PostMapping("/verify-code")
+    public String verifyCode(@RequestParam String email, @RequestParam String code) {
+        boolean isValid = userService.verifyCode(email, code);
+        return isValid ? "Verification successful" : "Invalid or expired code";
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestParam String email,
+            @RequestParam String code,
+            @RequestParam String newPassword) {
+
+        // Check if the code is valid
+        if (userService.verifyCode(email, code)) {
+            userService.resetPassword(email, newPassword);
+            return ResponseEntity.ok("Password reset successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired code");
+        }
+    }
+
+    @PostMapping("/update-username")
+    public ResponseEntity<String> updateUsername(
+            @RequestParam String oldUserName,
+            @RequestParam String newUserName) {
+
+        userService.updateUsername(oldUserName, newUserName);
+        return ResponseEntity.status(HttpStatus.OK).body("Username updated successfully.");
+    }
+
 }
