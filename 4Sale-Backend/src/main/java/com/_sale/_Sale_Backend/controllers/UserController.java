@@ -29,9 +29,21 @@ public class UserController {
     JwtService jwt;
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam String email) {
-        return userService.sendForgotPasswordCode(email);
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestParam String email) {
+        try {
+            String result = userService.sendForgotPasswordCode(email);
+            if ("User not found with the provided email.".equals(result)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", result));
+            }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", result));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "An unexpected error occurred."));
+        }
     }
+
 
     @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(

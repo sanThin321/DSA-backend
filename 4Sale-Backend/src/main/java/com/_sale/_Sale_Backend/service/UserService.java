@@ -53,9 +53,10 @@ public class UserService {
             emailService.sendVerificationEmail(email, "Your Verification Code", code, expiryFormatted);
             return "Verification code sent to email.";
         } catch (EmailSendException e) {
-            return "Error sending verification email: " + e.getMessage();
+            throw new EmailSendException("Error sending verification email: " + e.getMessage());
         }
     }
+
 
 
     private String generateVerificationCode() {

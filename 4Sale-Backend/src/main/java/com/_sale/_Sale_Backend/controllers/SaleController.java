@@ -1,5 +1,6 @@
 package com._sale._Sale_Backend.controllers;
 
+import com._sale._Sale_Backend.mode.dto.RevenueByDateDTO;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.service.SaleService;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -69,5 +71,15 @@ public class SaleController {
         }
     }
 
+    @GetMapping("/revenue-by-date")
+    public ResponseEntity<BigDecimal> getRevenueByDate(@RequestParam String saleDate) {
+        BigDecimal totalRevenue = saleService.getTotalRevenueBySaleDate(saleDate);
+        return ResponseEntity.ok(totalRevenue);
+    }
 
+    @GetMapping("/sales-count-by-date")
+    public ResponseEntity<Long> getTotalSalesByDate(@RequestParam String saleDate) {
+        Long totalSalesCount = saleService.getTotalSalesByDate(saleDate);
+        return ResponseEntity.ok(totalSalesCount);
+    }
 }

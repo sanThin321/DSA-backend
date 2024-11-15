@@ -1,5 +1,6 @@
 package com._sale._Sale_Backend.service;
 
+import com._sale._Sale_Backend.mode.dto.RevenueByDateDTO;
 import com._sale._Sale_Backend.model.Product;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.SaleItem;
@@ -78,4 +79,11 @@ public class SaleService {
     }
 
 
+    public BigDecimal getTotalRevenueBySaleDate(String saleDate) {
+        return saleRepo.getTotalRevenueBySaleDate(saleDate);
+    }
+
+    public Long getTotalSalesByDate(String saleDate) {
+        return saleRepo.getTotalSalesByDate(saleDate);
+    }
 }

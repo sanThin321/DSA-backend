@@ -3,7 +3,9 @@ package com._sale._Sale_Backend.repo;
 import com._sale._Sale_Backend.model.Sale;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface SaleRepo extends JpaRepository<Sale, Long> {
@@ -15,4 +17,10 @@ public interface SaleRepo extends JpaRepository<Sale, Long> {
             "GROUP BY si.product " +
             "ORDER BY totalQuantity DESC")
     List<Object[]> getTopSellingProductsByDate(String saleDate);
+
+    @Query("SELECT SUM(s.totalAmount) FROM Sale s WHERE s.saleDate = :saleDate")
+    BigDecimal getTotalRevenueBySaleDate(@Param("saleDate") String saleDate);
+
+    @Query("SELECT COUNT(s) FROM Sale s WHERE s.saleDate = :saleDate")
+    Long getTotalSalesByDate(@Param("saleDate") String saleDate);
 }
