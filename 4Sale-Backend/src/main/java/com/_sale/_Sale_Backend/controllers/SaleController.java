@@ -1,6 +1,7 @@
 package com._sale._Sale_Backend.controllers;
 
 import com._sale._Sale_Backend.model.Sale;
+import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,4 +47,27 @@ public class SaleController {
         saleService.deleteSale(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/top-selling-products-by-date/{saleDate}")
+    public ResponseEntity<?> getTopSellingProductsByDate(@PathVariable String saleDate) {
+        try {
+            // Fetch the top-selling products for the given date
+            List<ProductSalesDTO> topSellingProducts = saleService.getTopSellingProductsByDate(saleDate);
+
+            // Calculate total revenue for these products outside of the response definition
+            double calculatedTotalRevenue = topSellingProducts.stream()
+                    .mapToDouble(ProductSalesDTO::getTotalRevenue)
+                    .sum();
+
+            // Prepare and return the response
+            return ResponseEntity.ok(new Object() {
+                public final List<ProductSalesDTO> products = topSellingProducts;
+                public final double totalRevenue = calculatedTotalRevenue; // Use calculated value here
+            });
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
 }

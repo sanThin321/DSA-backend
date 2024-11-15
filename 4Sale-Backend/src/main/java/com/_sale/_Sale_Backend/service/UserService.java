@@ -80,16 +80,74 @@ public class UserService {
         }
     }
 
-    // update user name
-    public void updateUsername(String oldUserName, String newUserName) {
-        User user = userRepo.findByUsername(oldUserName);
+    public String updateUsername(String email, String newUsername, String currentPassword) {
+        User user = userRepo.findByEmail(email);
 
+        // Check if user exists
         if (user == null) {
-           return;
+            return "User not found.";
         }
 
-        user.setUsername(newUserName);
+        // Verify the current password
+        if (!encoder.matches(currentPassword, user.getPassword())) {
+            return "Current password is incorrect.";
+        }
+
+        // Update the username
+        user.setUsername(newUsername);
         userRepo.save(user);
+
+        return "Username updated successfully.";
+    }
+
+
+
+    public String changePassword(String email, String currentPassword, String newPassword) {
+        User user = userRepo.findByEmail(email);
+
+        // Check if user exists
+        if (user == null) {
+            return "User not found with the email.";
+        }
+
+        // Verify the current password
+        if (!encoder.matches(currentPassword, user.getPassword())) {
+            return "Current password is incorrect.";
+        }
+
+        // Update the password
+        user.setPassword(encoder.encode(newPassword));
+        user.setVerificationCode(null); // Clear verification details
+        user.setVerificationExpiry(null);
+        userRepo.save(user);
+
+        return "Password changed successfully.";
+    }
+
+
+    public String changeEmail(String currentEmail, String newEmail, String currentPassword) {
+        User user = userRepo.findByEmail(currentEmail);
+
+        // Check if user exists
+        if (user == null) {
+            return "User not found with the provided current email.";
+        }
+
+        // Check if the current password is correct
+        if (!encoder.matches(currentPassword, user.getPassword())) {
+            return "Invalid current password.";
+        }
+
+        // Check if the new email is already in use
+        if (userRepo.findByEmail(newEmail) != null) {
+            return "The new email is already associated with another account.";
+        }
+
+        // Update the email
+        user.setEmail(newEmail);
+        userRepo.save(user);
+
+        return "Email changed successfully.";
     }
 
 }

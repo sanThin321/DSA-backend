@@ -3,12 +3,15 @@ package com._sale._Sale_Backend.service;
 import com._sale._Sale_Backend.model.Product;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.SaleItem;
+import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.repo.SaleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
@@ -51,4 +54,28 @@ public class SaleService {
     public void deleteSale(Long id) {
         saleRepo.deleteById(id);
     }
+
+    public List<ProductSalesDTO> getTopSellingProductsByDate(String saleDate) {
+        List<Object[]> results = saleRepo.getTopSellingProductsByDate(saleDate);
+
+        return results.stream()
+                .limit(5)  // Get top 5 products
+                .map(result -> {
+                    Product product = (Product) result[0];
+                    Long totalQuantity = (Long) result[1];
+                    BigDecimal totalRevenue = (BigDecimal) result[2];
+
+                    return new ProductSalesDTO(
+                            product.getName(),
+                            product.getPrice(),
+                            totalQuantity,
+                            totalRevenue.doubleValue(),
+                            product.getImageData(),
+                            product.getQuantity()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+
 }

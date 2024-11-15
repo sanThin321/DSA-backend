@@ -30,7 +30,6 @@ public class Product {
     private String imageType;
     private String imageData;
 
-
     public Product(int id) {
         this.productId = id;
     }

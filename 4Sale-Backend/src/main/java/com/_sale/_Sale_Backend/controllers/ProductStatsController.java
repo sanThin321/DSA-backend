@@ -1,6 +1,7 @@
 package com._sale._Sale_Backend.controllers;
 
 import com._sale._Sale_Backend.model.Product;
+import com._sale._Sale_Backend.model.dto.CategoryRevenueDTO;
 import com._sale._Sale_Backend.service.ProductStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stats/product/")
@@ -37,5 +39,10 @@ public class ProductStatsController {
     public ResponseEntity<Long> getTotalNumberOfCategory() {
         long totalCategory = productService.getTotalNumberOfCategory();
         return ResponseEntity.ok(totalCategory);
+    }
+
+    @GetMapping("/category-revenue")
+    public Map<String, Object> getCategoryRevenue() {
+        return productService.getCategoryRevenue();
     }
 }
