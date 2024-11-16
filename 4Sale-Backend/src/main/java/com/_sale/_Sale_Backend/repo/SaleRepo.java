@@ -23,4 +23,16 @@ public interface SaleRepo extends JpaRepository<Sale, Long> {
 
     @Query("SELECT COUNT(s) FROM Sale s WHERE s.saleDate = :saleDate")
     Long getTotalSalesByDate(@Param("saleDate") String saleDate);
+
+    @Query("SELECT EXTRACT(MONTH FROM TO_DATE(s.saleDate, 'YYYY-MM-DD')) AS month, " +
+            "SUM(si.quantity) AS totalProductsSold, " +
+            "SUM(s.totalAmount) AS totalRevenue " +
+            "FROM Sale s " +
+            "JOIN s.sales si " +
+            "GROUP BY EXTRACT(MONTH FROM TO_DATE(s.saleDate, 'YYYY-MM-DD')) " +
+            "ORDER BY month")
+    List<Object[]> getMonthlyProductSalesAndRevenue();
+
+
+
 }

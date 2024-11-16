@@ -69,6 +69,11 @@ public class UserController {
 
 
 
+    @PostMapping("/register")
+    public  ResponseEntity<?> register(@RequestBody User req) {
+        User user = userService.saveUser(req);
+        return ResponseEntity.ok(user);
+    }
 
 
     @PostMapping("/login")
@@ -102,8 +107,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
         }
     }
-
-
 
     @PostMapping("/verify-code")
     public String verifyCode(@RequestParam String email, @RequestParam String code) {
@@ -174,6 +177,5 @@ public class UserController {
             default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         };
     }
-
 
 }

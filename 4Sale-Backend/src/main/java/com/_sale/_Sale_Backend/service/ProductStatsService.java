@@ -79,4 +79,8 @@ public class ProductStatsService {
 
         return response;
     }
+
+    public Long getOutOfStockCount() {
+        return productRepo.countOutOfStockProducts();
+    }
 }

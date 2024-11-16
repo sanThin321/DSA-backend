@@ -4,6 +4,7 @@ import com._sale._Sale_Backend.mode.dto.RevenueByDateDTO;
 import com._sale._Sale_Backend.model.Product;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.SaleItem;
+import com._sale._Sale_Backend.model.dto.MonthlySalesDto;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.repo.SaleRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Month;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -85,5 +90,16 @@ public class SaleService {
 
     public Long getTotalSalesByDate(String saleDate) {
         return saleRepo.getTotalSalesByDate(saleDate);
+    }
+
+    public List<MonthlySalesDto> getMonthlyProductSalesAndRevenue() {
+        List<Object[]> results = saleRepo.getMonthlyProductSalesAndRevenue();
+        return results.stream()
+                .map(result -> new MonthlySalesDto(
+                        Month.of(((Number) result[0]).intValue()).toString(), // Convert month number to name
+                        ((Number) result[2]).doubleValue(), // Total revenue
+                        ((Number) result[1]).intValue()     // Total products sold
+                ))
+                .collect(Collectors.toList());
     }
 }

@@ -45,4 +45,10 @@ public class ProductStatsController {
     public Map<String, Object> getCategoryRevenue() {
         return productService.getCategoryRevenue();
     }
+
+    @GetMapping("/out-of-stock-count")
+    public ResponseEntity<Long> getOutOfStockCount() {
+        Long outOfStockCount = productService.getOutOfStockCount();
+        return ResponseEntity.ok(outOfStockCount);
+    }
 }

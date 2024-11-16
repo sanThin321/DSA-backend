@@ -19,7 +19,6 @@ public class Product {
     private int productId;
     private String name;
     private int quantity;
-    private String unit;
     private BigDecimal price;
     private String category;
     private int thresholdValue;
