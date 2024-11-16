@@ -73,10 +73,19 @@ public class ProductController {
         }
     }
 
-    // search products
-    @GetMapping("/products/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
-        List<Product> products = productService.searchProducts(keyword);
-        return new ResponseEntity<>(products, HttpStatus.OK);
+//    // search products
+//    @GetMapping("/products/search")
+//    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
+//        List<Product> products = productService.searchProducts(keyword);
+//        return new ResponseEntity<>(products, HttpStatus.OK);
+//    }
+
+    // Search products by character with optional sorting
+    @GetMapping("/product/search")
+    public List<Product> searchProducts(
+            @RequestParam("query") String query,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy
+    ) {
+        return productService.searchProducts(query, sortBy);
     }
 }

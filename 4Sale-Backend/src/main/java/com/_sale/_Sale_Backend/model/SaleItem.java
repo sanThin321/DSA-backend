@@ -23,4 +23,3 @@ public class SaleItem {
     private int quantity;
     private BigDecimal totalPrice;
 }
-

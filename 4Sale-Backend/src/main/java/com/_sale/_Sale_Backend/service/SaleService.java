@@ -7,6 +7,7 @@ import com._sale._Sale_Backend.model.SaleItem;
 import com._sale._Sale_Backend.model.dto.MonthlySalesDto;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.repo.SaleRepo;
+import com._sale._Sale_Backend.utils.SaleSearchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,4 +103,18 @@ public class SaleService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public List<Sale> searchSales(String query) {
+        List<Sale> allSales = saleRepo.findAll();
+
+        // Sort the sales using Bubble Sort (or you could use a better sorting algorithm like Merge Sort)
+        SaleSearchUtil.bubbleSortByName(allSales);
+
+        // Perform linear search for exact or partial matches by customerName
+        // Now that it's sorted, we can search through the sorted list
+        return SaleSearchUtil.linearSearchByName(allSales, query);
+    }
+
+
+
 }

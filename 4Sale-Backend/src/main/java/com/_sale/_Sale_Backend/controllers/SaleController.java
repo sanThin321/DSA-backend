@@ -5,6 +5,7 @@ import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.dto.MonthlySalesDto;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.service.SaleService;
+import com._sale._Sale_Backend.utils.SaleSearchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,4 +90,10 @@ public class SaleController {
     public List<MonthlySalesDto> getMonthlyProductSalesAndRevenue() {
         return saleService.getMonthlyProductSalesAndRevenue();
     }
+
+    @GetMapping("/search")
+    public List<Sale> searchSales(@RequestParam String query) {
+        return saleService.searchSales(query);
+    }
+
 }
