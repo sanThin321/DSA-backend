@@ -1,5 +1,8 @@
 package com._sale._Sale_Backend.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CustomHashMap<K, V> {
     private static final float LOAD_FACTOR = 0.75f;  // Load factor threshold for resizing
     private int size;  // Number of key-value pairs in the map
@@ -9,12 +12,17 @@ public class CustomHashMap<K, V> {
     // Constructor to initialize buckets
     @SuppressWarnings("unchecked")
     public CustomHashMap() {
-        this.capacity = 16; 
+        this.capacity = 16;
         this.buckets = new CustomLinkedList[capacity];
-        this.size = 0; 
+        this.size = 0;
         for (int i = 0; i < capacity; i++) {
             buckets[i] = new CustomLinkedList<>();
         }
+    }
+
+    // isEmpty method to check if the map is empty
+    public boolean isEmpty() {
+        return size == 0;  // If size is 0, the map is empty
     }
 
     // Inner class representing key-value pairs
@@ -93,6 +101,20 @@ public class CustomHashMap<K, V> {
             }
         }
         return false;
+    }
+
+    // Method to return all the values in the map
+    public List<V> values() {
+        List<V> values = new ArrayList<>();
+
+        // Iterate through all the buckets
+        for (CustomLinkedList<Node<K, V>> bucket : buckets) {
+            for (Node<K, V> node : bucket) {
+                values.add(node.value);  // Add the value to the list
+            }
+        }
+
+        return values;  // Return the list of all values
     }
 
     // Resize the buckets array when the load factor exceeds the threshold

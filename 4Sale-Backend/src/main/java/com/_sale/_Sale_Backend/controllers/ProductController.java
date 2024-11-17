@@ -48,15 +48,19 @@ public class ProductController {
         }
     }
 
-    // to update product by id
-    @PutMapping("/product/{id}")
-    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product, @RequestPart MultipartFile imageFile) {
-        Product updatedProduct = null;
+    // update
+    @PutMapping(value = "/product/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateProduct(
+            @PathVariable int id,
+            @RequestPart Product product,
+            @RequestPart(required = false) MultipartFile imageFile) {
         try {
-            updatedProduct = productService.addOrUpdateProduct(product, imageFile);
-            return new ResponseEntity<>("Updated", HttpStatus.OK);
+            Product updatedProduct = productService.editProduct(id, product, imageFile);
+            return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -73,19 +77,12 @@ public class ProductController {
         }
     }
 
-//    // search products
-//    @GetMapping("/products/search")
-//    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
-//        List<Product> products = productService.searchProducts(keyword);
-//        return new ResponseEntity<>(products, HttpStatus.OK);
-//    }
-
-    // Search products by character with optional sorting
+    // Search products by query
     @GetMapping("/product/search")
     public List<Product> searchProducts(
-            @RequestParam("query") String query,
-            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy
+            @RequestParam("query") String query
     ) {
-        return productService.searchProducts(query, sortBy);
+        // Call the searchProducts method to filter and sort by name
+        return productService.searchProducts(query);
     }
 }

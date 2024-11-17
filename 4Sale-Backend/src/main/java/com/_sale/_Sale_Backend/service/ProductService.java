@@ -1,9 +1,10 @@
 package com._sale._Sale_Backend.service;
 
-//import com._sale._Sale_Backend.config.CloudinaryConfig;
 import com._sale._Sale_Backend.model.Product;
 import com._sale._Sale_Backend.repo.ProductRepo;
 import com._sale._Sale_Backend.utils.CustomHashMap;
+import com._sale._Sale_Backend.utils.LinearSearch;
+import com._sale._Sale_Backend.utils.MergeSort;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductService {
@@ -28,25 +26,32 @@ public class ProductService {
     private final CustomHashMap<Integer, Product> productCache = new CustomHashMap<>();
 
     public List<Product> getAllProducts() {
-        return productRepo.findAll();
+        List<Product> products = productRepo.findAll();
+
+        // Sort the products by name alphabetically using MergeSort
+        return MergeSort.mergeSort(products, Comparator.comparing(Product::getName));
     }
 
+
+    // Fetch product by ID from the cache, if not present, fetch from DB and add to cache
     public Product getProductById(int id) {
         Product cachedProduct = productCache.get(id);
         if (cachedProduct != null) {
-            return cachedProduct;
+            return cachedProduct;  // Return from cache if found
         }
 
+        // Fetch from DB and add to cache if not found in cache
         Optional<Product> productOpt = productRepo.findById(id);
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
-            productCache.put(id, product);
+            productCache.put(id, product);  // Cache the product
             return product;
         } else {
-            return new Product(-1);
+            return new Product(-1);  // Return a default product if not found
         }
     }
 
+    // Add or update product, including handling image upload to Cloudinary
     public Product addOrUpdateProduct(Product product, MultipartFile image) throws IOException {
         if (image != null && !image.isEmpty()) {
             Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.asMap(
@@ -58,101 +63,90 @@ public class ProductService {
                     "crop", "limit"
             ));
             String imageUrl = uploadResult.get("secure_url").toString();
-
             product.setImageName(image.getOriginalFilename());
             product.setImageType(image.getContentType());
             product.setImageData(imageUrl);
         }
 
+        // Save the product in the database
         Product savedProduct = productRepo.save(product);
+
+        // Cache the saved product
         productCache.put(savedProduct.getProductId(), savedProduct);
+
         return savedProduct;
     }
 
+    // Delete product by ID, removing it from the cache as well
     public void deleteById(int id) {
         productRepo.deleteById(id);
-        productCache.remove(id);
+        productCache.remove(id);  // Remove from cache
     }
 
-    public List<Product> searchProducts(String keyword) {
-        return productRepo.searchProducts(keyword);
-    }
-
+    // Update product quantity, and sync with the cache
     public void updateProductQuantity(Product product) {
         productRepo.save(product);
+        productCache.put(product.getProductId(), product);  // Update cache
     }
 
-    // search products
-    public List<Product> searchProducts(String query, String sortBy) {
-        // Fetch all products
+    // Search products by name, filter using LinearSearch, and sort results by name using MergeSort
+    public List<Product> searchProducts(String query) {
         List<Product> allProducts = productRepo.findAll();
 
-        // Filter products by query (case insensitive)
+        // Filter products by query using LinearSearch
         List<Product> filteredProducts = new ArrayList<>();
         for (Product product : allProducts) {
-            if (product.getName().toLowerCase().contains(query.toLowerCase())) {
-                filteredProducts.add(product);
+            Product foundProduct = LinearSearch.linearSearch(allProducts, product);
+            if (foundProduct != null && foundProduct.getName().toLowerCase().contains(query.toLowerCase())) {
+                filteredProducts.add(foundProduct);
             }
         }
 
-        // Sort filtered products using merge sort
-        return mergeSort(filteredProducts, sortBy.toLowerCase());
+        // Sort filtered products by name
+        return MergeSort.mergeSort(filteredProducts, (p1, p2) -> p1.getName().compareToIgnoreCase(p2.getName()));
     }
 
-    private List<Product> mergeSort(List<Product> products, String sortBy) {
-        if (products.size() <= 1) {
-            return products;
+    // Edit existing product, updating its details, including image if provided
+    public Product editProduct(int id, Product updatedProduct, MultipartFile image) throws IOException {
+        Optional<Product> optionalProduct = productRepo.findById(id);
+
+        if (optionalProduct.isEmpty()) {
+            throw new IllegalArgumentException("Product with ID " + id + " not found");
         }
 
-        // Divide the list into two halves
-        int mid = products.size() / 2;
-        List<Product> left = mergeSort(products.subList(0, mid), sortBy);
-        List<Product> right = mergeSort(products.subList(mid, products.size()), sortBy);
+        Product existingProduct = optionalProduct.get();
 
-        // Merge the sorted halves
-        return merge(left, right, sortBy);
-    }
+        // Update product details
+        existingProduct.setName(updatedProduct.getName());
+        existingProduct.setPrice(updatedProduct.getPrice());
+        existingProduct.setQuantity(updatedProduct.getQuantity());
+        existingProduct.setCategory(updatedProduct.getCategory());
+        existingProduct.setThresholdValue(updatedProduct.getThresholdValue());
+        existingProduct.setExpirationDate(updatedProduct.getExpirationDate());
+        existingProduct.setProductAvailable(updatedProduct.isProductAvailable());
 
-    private List<Product> merge(List<Product> left, List<Product> right, String sortBy) {
-        List<Product> merged = new ArrayList<>();
-        int i = 0, j = 0;
-
-        // Merge two lists based on the sorting criteria
-        while (i < left.size() && j < right.size()) {
-            if (compareProducts(left.get(i), right.get(j), sortBy) <= 0) {
-                merged.add(left.get(i));
-                i++;
-            } else {
-                merged.add(right.get(j));
-                j++;
-            }
+        // Handle image upload if a new image is provided
+        if (image != null && !image.isEmpty()) {
+            Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.asMap(
+                    "folder", "4sale",
+                    "quality", "auto",
+                    "fetch_format", "auto",
+                    "width", 400,
+                    "height", 400,
+                    "crop", "limit"
+            ));
+            String imageUrl = uploadResult.get("secure_url").toString();
+            existingProduct.setImageName(image.getOriginalFilename());
+            existingProduct.setImageType(image.getContentType());
+            existingProduct.setImageData(imageUrl);
         }
 
-        // Add remaining elements from left
-        while (i < left.size()) {
-            merged.add(left.get(i));
-            i++;
-        }
+        // Save the updated product to the database
+        Product savedProduct = productRepo.save(existingProduct);
 
-        // Add remaining elements from right
-        while (j < right.size()) {
-            merged.add(right.get(j));
-            j++;
-        }
+        // Update the cache
+        productCache.put(savedProduct.getProductId(), savedProduct);
 
-        return merged;
-    }
-
-    private int compareProducts(Product p1, Product p2, String sortBy) {
-        switch (sortBy) {
-            case "price":
-                return p1.getPrice().compareTo(p2.getPrice());
-            case "quantity":
-                return Integer.compare(p1.getQuantity(), p2.getQuantity());
-            case "expirationdate":
-                return p1.getExpirationDate().compareTo(p2.getExpirationDate());
-            default: // Default sorting by name
-                return p1.getName().compareToIgnoreCase(p2.getName());
-        }
+        return savedProduct;
     }
 }

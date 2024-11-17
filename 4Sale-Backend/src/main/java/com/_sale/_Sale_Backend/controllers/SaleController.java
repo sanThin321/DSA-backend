@@ -1,11 +1,9 @@
 package com._sale._Sale_Backend.controllers;
 
-import com._sale._Sale_Backend.mode.dto.RevenueByDateDTO;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.dto.MonthlySalesDto;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.service.SaleService;
-import com._sale._Sale_Backend.utils.SaleSearchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("api/sale")
@@ -48,10 +45,17 @@ public class SaleController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteSale(@PathVariable Long id) {
-        saleService.deleteSale(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteSale(@PathVariable Long id) {
+        boolean isDeleted = saleService.deleteSale(id);
+
+        if (isDeleted) {
+            return ResponseEntity.ok("Sale successfully deleted."); // 200 OK with a success message
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sale not found."); // 404 Not Found with a message
+        }
     }
+
+
 
     @GetMapping("/top-selling-products-by-date/{saleDate}")
     public ResponseEntity<?> getTopSellingProductsByDate(@PathVariable String saleDate) {
@@ -59,7 +63,7 @@ public class SaleController {
             // Fetch the top-selling products for the given date
             List<ProductSalesDTO> topSellingProducts = saleService.getTopSellingProductsByDate(saleDate);
 
-            // Calculate total revenue for these products outside of the response definition
+            // Calculate total revenue for these products outside the response definition
             double calculatedTotalRevenue = topSellingProducts.stream()
                     .mapToDouble(ProductSalesDTO::getTotalRevenue)
                     .sum();

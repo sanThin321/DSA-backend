@@ -1,13 +1,14 @@
 package com._sale._Sale_Backend.service;
 
-import com._sale._Sale_Backend.mode.dto.RevenueByDateDTO;
 import com._sale._Sale_Backend.model.Product;
 import com._sale._Sale_Backend.model.Sale;
 import com._sale._Sale_Backend.model.SaleItem;
 import com._sale._Sale_Backend.model.dto.MonthlySalesDto;
 import com._sale._Sale_Backend.model.dto.ProductSalesDTO;
 import com._sale._Sale_Backend.repo.SaleRepo;
-import com._sale._Sale_Backend.utils.SaleSearchUtil;
+import com._sale._Sale_Backend.utils.LinearSearch;
+import com._sale._Sale_Backend.utils.BubbleSort;
+import com._sale._Sale_Backend.utils.MergeSort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,15 +51,24 @@ public class SaleService {
     }
 
     public List<Sale> getAllSales() {
-        return saleRepo.findAll();
+        List<Sale> sales = saleRepo.findAll();
+
+        // Sort the sales by customer name alphabetically using MergeSort
+        return MergeSort.mergeSort(sales, Comparator.comparing(Sale::getCustomerName));
     }
+
 
     public Sale getSaleById(Long id) {
         return saleRepo.findById(id).orElse(null);
     }
 
-    public void deleteSale(Long id) {
-        saleRepo.deleteById(id);
+    public boolean deleteSale(Long id) {
+        if (saleRepo.existsById(id)) { // Check if the sale exists
+            saleRepo.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public List<ProductSalesDTO> getTopSellingProductsByDate(String saleDate) {
@@ -84,7 +93,6 @@ public class SaleService {
                 .collect(Collectors.toList());
     }
 
-
     public BigDecimal getTotalRevenueBySaleDate(String saleDate) {
         return saleRepo.getTotalRevenueBySaleDate(saleDate);
     }
@@ -105,16 +113,19 @@ public class SaleService {
     }
 
     public List<Sale> searchSales(String query) {
+        // Fetch all sales
         List<Sale> allSales = saleRepo.findAll();
 
-        // Sort the sales using Bubble Sort (or you could use a better sorting algorithm like Merge Sort)
-        SaleSearchUtil.bubbleSortByName(allSales);
+        // Filter sales by checking if customerName contains the query
+        List<Sale> filteredSales = new ArrayList<>();
+        for (Sale sale : allSales) {
+            if (sale.getCustomerName() != null &&
+                    sale.getCustomerName().toLowerCase().contains(query.toLowerCase())) {
+                filteredSales.add(sale);
+            }
+        }
 
-        // Perform linear search for exact or partial matches by customerName
-        // Now that it's sorted, we can search through the sorted list
-        return SaleSearchUtil.linearSearchByName(allSales, query);
+        // Sort the filtered sales alphabetically by customerName
+        return BubbleSort.bubbleSort(filteredSales);
     }
-
-
-
 }
